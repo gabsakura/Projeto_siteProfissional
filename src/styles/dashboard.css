@@ -1,0 +1,17 @@
+/* Dashboard.css */
+.dashboard {
+    flex: 1; /* Ocupa o espaço restante */
+    padding: 20px; /* Espaçamento interno */
+    background-color: #f4f4f9; /* Cor de fundo */
+    height: 100%; /* Altura total do conteúdo */
+    overflow-y: auto; /* Rolagem vertical se necessário */
+  }
+  
+  .dashboard h2 {
+    color: #333; /* Cor do título */
+  }
+  
+  .dashboard .grid-container {
+    padding: 15px; /* Espaçamento interno */
+  }
+  

@@ -1,0 +1,23 @@
+/* KanbanBoard.css */
+.kanban-board {
+    flex: 1; /* Ocupa o espaço restante */
+    padding: 20px; /* Espaçamento interno */
+    background-color: #f4f4f9; /* Cor de fundo */
+    height: 100%; /* Altura total do conteúdo */
+    overflow-y: auto; /* Rolagem vertical se necessário */
+  }
+  
+  .kanban-board h2 {
+    color: #333; /* Cor do título */
+  }
+  
+  /* Estilos adicionais para as colunas do Kanban */
+  .column {
+    background-color: #fff; /* Cor de fundo da coluna */
+    border: 1px solid #ccc; /* Borda da coluna */
+    border-radius: 4px; /* Bordas arredondadas */
+    margin: 10px; /* Espaçamento externo */
+    padding: 10px; /* Espaçamento interno */
+    min-height: 100px; /* Altura mínima */
+  }
+  

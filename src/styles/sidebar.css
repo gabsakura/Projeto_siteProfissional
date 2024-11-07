@@ -1,0 +1,19 @@
+/* Sidebar.css */
+.sidebar {
+    width: 250px; /* Largura fixa da sidebar */
+    background-color: #333; /* Cor de fundo */
+    color: #fff; /* Cor do texto */
+    padding: 10px; /* Espaçamento interno */
+    height: 100vh; /* Altura total da tela */
+    position: fixed; /* Fixa na lateral */
+    overflow-y: auto; /* Rolagem vertical se necessário */
+  }
+  
+  .sidebar .MuiListItemText-primary {
+    color: white; /* Cor do texto dos itens da lista */
+  }
+  
+  .sidebar .MuiListItem:hover {
+    background-color: #444; /* Efeito hover nos itens */
+  }
+  
