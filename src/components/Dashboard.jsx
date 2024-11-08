@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Grid, Box, Tabs, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Button, Typography, IconButton, Modal } from '@mui/material';
-import { Search as SearchIcon } from '@mui/icons-material';
+import {
+  Grid, Box, Tabs, Tab, Table, TableBody, TableCell, TableContainer,
+  TableHead, TableRow, Paper, TextField, Button, Typography, Modal
+} from '@mui/material';
 import ChartCard from './ChartCard';
 import axios from 'axios';
 
@@ -20,7 +22,6 @@ const Dashboard = () => {
     const today = new Date();
     const lastWeek = new Date(today);
     lastWeek.setDate(today.getDate() - 7);
-
     setStartDate(lastWeek.toISOString().split('T')[0]);
     setEndDate(today.toISOString().split('T')[0]);
   }, []);
@@ -73,7 +74,7 @@ const Dashboard = () => {
           axios.put(`http://localhost:5000/api/inventory/${item.id}`, { quantity: item.quantity })
         )
       );
-      fetchInventoryData(); // Atualiza os dados após a modificação
+      fetchInventoryData();
       alert("Inventário atualizado com sucesso!");
     } catch (error) {
       console.error('Erro ao atualizar o inventário:', error);
@@ -102,20 +103,16 @@ const Dashboard = () => {
   };
 
   const deleteInventoryItem = async (id) => {
-    try {
-      const response = await axios.delete(`http://localhost:5000/api/inventory/${id}`);
-      if (response.status === 200) {
-        fetchInventoryData(); // Atualiza os dados após a remoção
-        alert("Item removido com sucesso!");
-      } else {
-        console.error(`Erro ao remover item: Status ${response.status}`);
-        alert("Erro ao remover item.");
-      }
-    } catch (error) {
-      console.error('Erro ao remover item:', error);
-      alert("Erro ao remover o item. Verifique o console para mais detalhes.");
-    }
-  };
+    axios.delete(`http://localhost:5000/api/inventory/${id}`)
+    .then(response => {
+      console.log('Item deletado com sucesso:', response.data);
+      fetchInventory();
+      // Lógica para atualizar a lista de itens, se necessário
+    })
+    .catch(error => {
+      console.error("Erro ao remover item:", error);
+    });
+};
 
   const openModal = (data) => setModalData(data);
   const closeModal = () => setModalData(null);
@@ -189,8 +186,30 @@ const Dashboard = () => {
 
       {tabValue === 1 && (
         <Box sx={{ marginTop: 2 }}>
+
+          
           <Typography variant="h6" sx={{ marginBottom: 2 }}>Dados do Inventário</Typography>
 
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, marginTop: 2 }}>
+            <TextField
+              label="Novo Item"
+              value={newItemName}
+              onChange={(e) => setNewItemName(e.target.value)}
+            />
+            <TextField
+              label="Quantidade"
+              type="number"
+              value={newItemQuantity}
+              onChange={(e) => setNewItemQuantity(Number(e.target.value))}
+            />
+            <Button variant="contained" color="primary" onClick={addInventoryItem}>
+              Adicionar Item
+            </Button>
+            <Button variant="contained" color="secondary" onClick={updateInventory}>
+              Salvar Alterações
+            </Button>
+          </Box>
+          
           <TableContainer component={Paper}>
             <Table>
               <TableHead>
@@ -209,14 +228,14 @@ const Dashboard = () => {
                     <TableCell>
                       <TextField
                         type="number"
-                        value={editedInventory[item.id]}
+                        value={editedInventory[item.id] || ''}
                         onChange={(e) => handleQuantityChange(item.id, Number(e.target.value))}
                         sx={{ width: '100px' }}
                       />
                     </TableCell>
                     <TableCell>
                       <Button variant="outlined" color="secondary" onClick={() => deleteInventoryItem(item.id)}>
-                        Remover
+                        Excluir
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -225,15 +244,6 @@ const Dashboard = () => {
             </Table>
           </TableContainer>
 
-          <Box sx={{ display: 'flex', gap: 2, marginTop: 2 }}>
-            <TextField label="Nome do Item" value={newItemName} onChange={(e) => setNewItemName(e.target.value)} />
-            <TextField label="Quantidade" type="number" value={newItemQuantity} onChange={(e) => setNewItemQuantity(Number(e.target.value))} />
-            <Button variant="contained" onClick={addInventoryItem}>Adicionar Item</Button>
-          </Box>
-
-          <Button variant="contained" color="primary" onClick={updateInventory} sx={{ marginTop: 2 }}>
-            Atualizar Inventário
-          </Button>
         </Box>
       )}
     </Box>
