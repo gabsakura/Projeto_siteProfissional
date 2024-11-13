@@ -1,3 +1,4 @@
+// Inventory.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -10,20 +11,32 @@ function Inventory() {
   }, []);
 
   const fetchInventory = async () => {
-    const response = await axios.get('/api/inventory');
-    setInventory(response.data.data);
+    try {
+      const response = await axios.get('/api/inventory');
+      setInventory(response.data.data || []); // Garante um array mesmo se data for null
+    } catch (error) {
+      console.error("Erro ao buscar o inventário:", error);
+    }
   };
 
   const handleDelete = async (id) => {
-    await axios.delete(`/api/inventory/${id}`);
-    fetchInventory(); // Atualiza a lista após a exclusão
+    try {
+      await axios.delete(`/api/inventory/${id}`);
+      fetchInventory();
+    } catch (error) {
+      console.error("Erro ao deletar item:", error);
+    }
   };
 
   const handleAddItem = async () => {
     if (newItem.item && newItem.quantity > 0) {
-      await axios.post('/api/inventory', newItem);
-      setNewItem({ item: '', quantity: 1 });
-      fetchInventory(); // Atualiza a lista após a adição
+      try {
+        await axios.post('/api/inventory', newItem);
+        setNewItem({ item: '', quantity: 1 });
+        fetchInventory();
+      } catch (error) {
+        console.error("Erro ao adicionar item:", error);
+      }
     }
   };
 

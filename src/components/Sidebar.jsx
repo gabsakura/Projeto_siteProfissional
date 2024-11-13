@@ -1,37 +1,48 @@
-// Sidebar.jsx
+// src/components/Sidebar.js
 import React from 'react';
-import { List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import PersonIcon from '@mui/icons-material/Person';
-import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
-import { useLocation, Link } from 'react-router-dom';
+import { Drawer, List, ListItem, ListItemIcon, ListItemText, Toolbar, Typography } from '@mui/material';
+import { Home, Person, Notifications, Dashboard } from '@mui/icons-material';
+import { Link } from 'react-router-dom';
 
 const Sidebar = ({ isAdmin }) => {
-  const location = useLocation();
-
-  const menuItems = [
-    { label: 'Dashboard', icon: <DashboardIcon />, to: '/dashboard' },
-    { label: 'Notifications', icon: <NotificationsIcon />, to: '/notifications' },
-    { label: 'Profile', icon: <PersonIcon />, to: '/profile' },
-  ];
-
-  // Condicionalmente adiciona a rota de Admin Notifications se isAdmin for verdadeiro
-  if (isAdmin) {
-    menuItems.push({ label: 'Admin Notifications', icon: <AdminPanelSettingsIcon />, to: '/admin-notifications' });
-  }
-
   return (
-    <div className="sidebar">
+    <Drawer
+      variant="permanent"
+      sx={{
+        width: 240,
+        flexShrink: 0,
+        '& .MuiDrawer-paper': {
+          width: 240,
+          boxSizing: 'border-box',
+        },
+      }}
+    >
+      <Toolbar>
+        <Typography variant="h6" noWrap component="div">
+          Painel
+        </Typography>
+      </Toolbar>
       <List>
-        {menuItems.map((item, index) => (
-          <ListItem button key={index} component={Link} to={item.to} selected={location.pathname === item.to}>
-            <ListItemIcon>{item.icon}</ListItemIcon>
-            <ListItemText primary={item.label} />
+        <ListItem button component={Link} to="/dashboard">
+          <ListItemIcon><Home /></ListItemIcon>
+          <ListItemText primary="Dashboard" />
+        </ListItem>
+        <ListItem button component={Link} to="/profile">
+          <ListItemIcon><Person /></ListItemIcon>
+          <ListItemText primary="Perfil" />
+        </ListItem>
+        <ListItem button component={Link} to="/notifications">
+          <ListItemIcon><Notifications /></ListItemIcon>
+          <ListItemText primary="Notificações" />
+        </ListItem>
+        {isAdmin && (
+          <ListItem button component={Link} to="/admin-notifications">
+            <ListItemIcon><Dashboard /></ListItemIcon>
+            <ListItemText primary="Notificações Admin" />
           </ListItem>
-        ))}
+        )}
       </List>
-    </div>
+    </Drawer>
   );
 };
 

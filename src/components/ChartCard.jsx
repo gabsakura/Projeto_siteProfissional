@@ -1,19 +1,20 @@
+// ChartCard.js
 import React, { useState } from 'react';
 import { Card, CardContent, Typography, Box, Button, Modal, IconButton } from '@mui/material';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 
-const ChartCard = ({ title, lineData, chartType, height = 300 }) => {
+const ChartCard = ({ title, lineData = [], chartType, height = 300 }) => {
   const [open, setOpen] = useState(false);
 
-  // Obter valores mínimo e máximo para ajustar o eixo Y dinamicamente
-  const minValue = Math.min(...lineData.map((d) => d.value));
-  const maxValue = Math.max(...lineData.map((d) => d.value));
-  const yAxisDomain = [Math.floor(minValue * 0.9), Math.ceil(maxValue * 1.1)]; // Domínio ajustado
+  // Verifica se lineData tem dados antes de calcular minValue e maxValue
+  const minValue = lineData.length > 0 ? Math.min(...lineData.map((d) => d.value)) : 0;
+  const maxValue = lineData.length > 0 ? Math.max(...lineData.map((d) => d.value)) : 1;
+  const yAxisDomain = [Math.floor(minValue * 0.9), Math.ceil(maxValue * 1.1)];
 
   const renderChart = (isModal) => {
     const chartHeight = isModal ? 400 : height;
-    const chartWidth = isModal ? '100%' : '95%'; // Ajuste de largura para evitar rolagem lateral
+    const chartWidth = isModal ? '100%' : '95%';
 
     return (
       <ResponsiveContainer width={chartWidth} height={chartHeight}>

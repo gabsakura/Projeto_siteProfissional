@@ -28,57 +28,47 @@ const Dashboard = () => {
 
   const fetchFinancialData = async () => {
     try {
-      const params = {};
-      if (startDate) params.startDate = startDate;
-      if (endDate) params.endDate = endDate;
-
-      const response = await axios.get('http://localhost:5000/api/financial_data', { params });
-      setFinancialData(response.data.data || []);
+      const response = await axios.get('http://localhost:5000/api/financial_data', {
+        params: { startDate, endDate },
+      });
+      setFinancialData(Array.isArray(response.data.data) ? response.data.data : []);
     } catch (error) {
       console.error('Erro ao buscar dados financeiros:', error);
-      setFinancialData([]);
     }
   };
 
   const fetchInventoryData = async () => {
     try {
       const response = await axios.get('http://localhost:5000/api/inventory');
-      const data = response.data.data || [];
-      setInventoryData(data);
-      setEditedInventory(data.reduce((acc, item) => {
-        acc[item.id] = item.quantity;
-        return acc;
-      }, {}));
+      setInventoryData(Array.isArray(response.data.data) ? response.data.data : []);
     } catch (error) {
       console.error('Erro ao buscar dados de inventário:', error);
-      setInventoryData([]);
     }
   };
 
   const handleQuantityChange = (id, newQuantity) => {
-    setEditedInventory(prevState => ({
+    setEditedInventory((prevState) => ({
       ...prevState,
-      [id]: newQuantity
+      [id]: newQuantity,
     }));
   };
 
   const updateInventory = async () => {
-    const updates = Object.keys(editedInventory).map(id => ({
+    const updates = Object.keys(editedInventory).map((id) => ({
       id,
-      quantity: editedInventory[id]
+      quantity: editedInventory[id],
     }));
-
     try {
       await Promise.all(
-        updates.map(item =>
+        updates.map((item) =>
           axios.put(`http://localhost:5000/api/inventory/${item.id}`, { quantity: item.quantity })
         )
       );
       fetchInventoryData();
-      alert("Inventário atualizado com sucesso!");
+      alert('Inventário atualizado com sucesso!');
     } catch (error) {
       console.error('Erro ao atualizar o inventário:', error);
-      alert("Erro ao atualizar o inventário.");
+      alert('Erro ao atualizar o inventário.');
     }
   };
 
@@ -86,33 +76,26 @@ const Dashboard = () => {
     try {
       const response = await axios.post('http://localhost:5000/api/inventory', {
         item: newItemName,
-        quantity: newItemQuantity
+        quantity: newItemQuantity,
       });
-      if (response.status === 201) {
-        setNewItemName('');
-        setNewItemQuantity('');
-        fetchInventoryData();
-        alert("Item adicionado com sucesso!");
-      } else {
-        console.error(`Erro ao adicionar item: Status ${response.status}`);
-      }
+      setNewItemName('');
+      setNewItemQuantity('');
+      fetchInventoryData();
+      alert('Item adicionado com sucesso!');
     } catch (error) {
       console.error('Erro ao adicionar item:', error);
-      alert("Erro ao adicionar o item.");
+      alert('Erro ao adicionar o item.');
     }
   };
 
   const deleteInventoryItem = async (id) => {
-    axios.delete(`http://localhost:5000/api/inventory/${id}`)
-    .then(response => {
-      console.log('Item deletado com sucesso:', response.data);
-      fetchInventory();
-      // Lógica para atualizar a lista de itens, se necessário
-    })
-    .catch(error => {
-      console.error("Erro ao remover item:", error);
-    });
-};
+    try {
+      await axios.delete(`http://localhost:5000/api/inventory/${id}`);
+      fetchInventoryData();
+    } catch (error) {
+      console.error('Erro ao remover item:', error);
+    }
+  };
 
   const openModal = (data) => setModalData(data);
   const closeModal = () => setModalData(null);
@@ -124,14 +107,16 @@ const Dashboard = () => {
 
   const formatDate = (timestamp) => {
     const date = new Date(timestamp);
-    return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+    return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
   };
 
-  const totalMoneyData = financialData.map(item => ({ name: formatDate(item.timestamp), value: item.total_money }));
-  const profitData = financialData.map(item => ({ name: formatDate(item.timestamp), value: item.profit }));
-  const salesData = financialData.map(item => ({ name: formatDate(item.timestamp), value: item.sales }));
-  const expensesData = financialData.map(item => ({ name: formatDate(item.timestamp), value: item.expenses }));
-  const buyersData = financialData.map(item => ({ name: formatDate(item.timestamp), value: item.new_customers }));
+  const financialDataMapping = [
+    { label: 'Total em Dinheiro', data: financialData.map(item => ({ name: formatDate(item.timestamp), value: item.total_money })) },
+    { label: 'Lucro', data: financialData.map(item => ({ name: formatDate(item.timestamp), value: item.profit })) },
+    { label: 'Vendas', data: financialData.map(item => ({ name: formatDate(item.timestamp), value: item.sales })) },
+    { label: 'Despesas', data: financialData.map(item => ({ name: formatDate(item.timestamp), value: item.expenses })) },
+    { label: 'Novos Clientes', data: financialData.map(item => ({ name: formatDate(item.timestamp), value: item.new_customers })) },
+  ];
 
   return (
     <Box sx={{ padding: 3, width: '100%', overflowX: 'hidden', display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -163,15 +148,9 @@ const Dashboard = () => {
           </Box>
 
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6} md={4}>
-              <Box sx={{ position: 'relative' }}>
-                <ChartCard title="Total em Dinheiro" lineData={totalMoneyData} chartType={chartType} height={200} />
-              </Box>
-            </Grid>
-
-            {[profitData, salesData, expensesData, buyersData].map((data, index) => (
+            {financialDataMapping.map((item, index) => (
               <Grid item xs={12} sm={6} md={4} key={index}>
-                <ChartCard title={["Lucro", "Vendas", "Despesas", "Novos Clientes"][index]} lineData={data} chartType={chartType} height={200} />
+                <ChartCard title={item.label} lineData={item.data} chartType={chartType} height={200} />
               </Grid>
             ))}
           </Grid>
@@ -186,10 +165,7 @@ const Dashboard = () => {
 
       {tabValue === 1 && (
         <Box sx={{ marginTop: 2 }}>
-
-          
           <Typography variant="h6" sx={{ marginBottom: 2 }}>Dados do Inventário</Typography>
-
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, marginTop: 2 }}>
             <TextField
               label="Novo Item"
@@ -209,7 +185,7 @@ const Dashboard = () => {
               Salvar Alterações
             </Button>
           </Box>
-          
+
           <TableContainer component={Paper}>
             <Table>
               <TableHead>
@@ -228,14 +204,13 @@ const Dashboard = () => {
                     <TableCell>
                       <TextField
                         type="number"
-                        value={editedInventory[item.id] || ''}
+                        value={editedInventory[item.id] || item.quantity}
                         onChange={(e) => handleQuantityChange(item.id, Number(e.target.value))}
-                        sx={{ width: '100px' }}
                       />
                     </TableCell>
                     <TableCell>
-                      <Button variant="outlined" color="secondary" onClick={() => deleteInventoryItem(item.id)}>
-                        Excluir
+                      <Button variant="contained" color="error" onClick={() => deleteInventoryItem(item.id)}>
+                        Remover
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -243,7 +218,6 @@ const Dashboard = () => {
               </TableBody>
             </Table>
           </TableContainer>
-
         </Box>
       )}
     </Box>
