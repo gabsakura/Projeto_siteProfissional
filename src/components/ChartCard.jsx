@@ -1,16 +1,36 @@
 // ChartCard.js
 import React, { useState } from 'react';
-import { Card, CardContent, Typography, Box, Button, Modal, IconButton } from '@mui/material';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
+import { Card, CardContent, Typography, Box, IconButton, Modal, Button } from '@mui/material';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 
 const ChartCard = ({ title, lineData = [], chartType, height = 300 }) => {
+  console.log('ChartCard render:', { title, lineData, chartType });
+  
+  // Verificação de segurança para dados vazios
+  if (!lineData || lineData.length === 0) {
+    return (
+      <Card sx={{ height: '100%', borderRadius: '20px', padding: 2 }}>
+        <CardContent>
+          <Typography variant="h6" component="div" gutterBottom>{title}</Typography>
+          <Typography color="textSecondary">Sem dados disponíveis</Typography>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const [open, setOpen] = useState(false);
 
-  // Verifica se lineData tem dados antes de calcular minValue e maxValue
   const minValue = lineData.length > 0 ? Math.min(...lineData.map((d) => d.value)) : 0;
   const maxValue = lineData.length > 0 ? Math.max(...lineData.map((d) => d.value)) : 1;
   const yAxisDomain = [Math.floor(minValue * 0.9), Math.ceil(maxValue * 1.1)];
+
+  const formatValue = (value, name) => {
+    if (name.includes('Dinheiro') || name.includes('Vendas') || name.includes('Despesas')) {
+      return `R$ ${Number(value).toFixed(2)}`;
+    }
+    return Number(value).toFixed(0);
+  };
 
   const renderChart = (isModal) => {
     const chartHeight = isModal ? 400 : height;
@@ -20,19 +40,17 @@ const ChartCard = ({ title, lineData = [], chartType, height = 300 }) => {
       <ResponsiveContainer width={chartWidth} height={chartHeight}>
         {chartType === 'line' && (
           <LineChart data={lineData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis domain={yAxisDomain} />
-            <Tooltip />
-            <Line type="monotone" dataKey="value" stroke="#8884d8" strokeWidth={2} dot={{ r: 3 }} />
+            <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+            <YAxis domain={yAxisDomain} tick={{ fontSize: 12 }} />
+            <Tooltip formatter={(value, name) => [formatValue(value, name), name]} />
+            <Line type="monotone" dataKey="value" stroke="#8884d8" strokeWidth={2} dot={false} />
           </LineChart>
         )}
         {chartType === 'bar' && (
           <BarChart data={lineData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis domain={yAxisDomain} />
-            <Tooltip />
+            <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+            <YAxis domain={yAxisDomain} tick={{ fontSize: 12 }} />
+            <Tooltip formatter={(value, name) => [formatValue(value, name), name]} />
             <Bar dataKey="value" fill="#8884d8" />
           </BarChart>
         )}
@@ -43,7 +61,7 @@ const ChartCard = ({ title, lineData = [], chartType, height = 300 }) => {
                 <Cell key={`cell-${index}`} fill="#8884d8" />
               ))}
             </Pie>
-            <Tooltip />
+            <Tooltip formatter={(value, name) => [formatValue(value, name), name]} />
           </PieChart>
         )}
       </ResponsiveContainer>

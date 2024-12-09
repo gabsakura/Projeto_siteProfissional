@@ -1,8 +1,31 @@
 // src/components/LoginForm.js
 import React, { useState } from 'react';
-import { Avatar, Button, TextField, Typography, Container, Box } from '@mui/material';
+import { 
+  Avatar, 
+  Button, 
+  TextField, 
+  Typography, 
+  Container, 
+  Box,
+  Paper,
+  Alert,
+  Divider,
+  Link
+} from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
+
+const TEST_CREDENTIALS = {
+  admin: {
+    email: 'admin@example.com',
+    password: 'admin123'
+  },
+  user: {
+    email: 'user@example.com',
+    password: 'user123'
+  }
+};
 
 const LoginForm = ({ onLogin }) => {
   const [email, setEmail] = useState('');
@@ -10,36 +33,64 @@ const LoginForm = ({ onLogin }) => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (email === 'admin@example.com') {
-      onLogin(true); // Loga como admin
+    setError('');
+
+    try {
+      const response = await api.post('/login', { email, password });
+      const { token, user } = response.data;
+      
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      
+      onLogin(user);
       navigate('/dashboard');
-    } else if (email === 'user@example.com') {
-      onLogin(false); // Loga como usuário comum
-      navigate('/dashboard');
-    } else {
-      setError('Credenciais inválidas.');
+    } catch (error) {
+      console.error('Erro no login:', error);
+      setError(error.response?.data?.error || 'Erro ao fazer login');
     }
+  };
+
+  const handleTestCredentials = (type) => {
+    setEmail(TEST_CREDENTIALS[type].email);
+    setPassword(TEST_CREDENTIALS[type].password);
+    setError('');
   };
 
   return (
     <Container component="main" maxWidth="xs">
-      <Box
+      <Paper
+        elevation={3}
         sx={{
           marginTop: 8,
+          padding: 3,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
+          borderRadius: 2,
         }}
       >
-        <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-          <LockOutlinedIcon />
+        <Avatar sx={{ 
+          m: 1, 
+          bgcolor: 'primary.main',
+          width: 56,
+          height: 56
+        }}>
+          <LockOutlinedIcon sx={{ fontSize: 32 }} />
         </Avatar>
-        <Typography component="h1" variant="h5">
+        
+        <Typography component="h1" variant="h5" sx={{ mb: 3 }}>
           Login
         </Typography>
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+
+        {error && (
+          <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+
+        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
           <TextField
             margin="normal"
             required
@@ -51,6 +102,7 @@ const LoginForm = ({ onLogin }) => {
             autoFocus
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            sx={{ mb: 2 }}
           />
           <TextField
             margin="normal"
@@ -63,23 +115,69 @@ const LoginForm = ({ onLogin }) => {
             autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            sx={{ mb: 3 }}
           />
-          {error && (
-            <Typography color="error" variant="body2">
-              {error}
-            </Typography>
-          )}
+          
           <Button
             type="submit"
             fullWidth
             variant="contained"
-            color="primary"
-            sx={{ mt: 3, mb: 2 }}
+            size="large"
+            sx={{ 
+              mb: 3,
+              py: 1.2,
+              fontSize: '1.1rem'
+            }}
           >
             Entrar
           </Button>
+
+          <Divider sx={{ mb: 2 }}>
+            <Typography color="textSecondary" variant="body2">
+              Credenciais de Teste
+            </Typography>
+          </Divider>
+
+          <Box sx={{ 
+            display: 'flex', 
+            gap: 2, 
+            mb: 2,
+            justifyContent: 'center'
+          }}>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={() => handleTestCredentials('admin')}
+              size="small"
+            >
+              Admin
+            </Button>
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={() => handleTestCredentials('user')}
+              size="small"
+            >
+              Usuário
+            </Button>
+          </Box>
+
+          <Box sx={{ 
+            mt: 2,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 1
+          }}>
+            <Typography variant="caption" color="textSecondary" align="center">
+              Admin: {TEST_CREDENTIALS.admin.email} / {TEST_CREDENTIALS.admin.password}
+            </Typography>
+            <Typography variant="caption" color="textSecondary" align="center">
+              User: {TEST_CREDENTIALS.user.email} / {TEST_CREDENTIALS.user.password}
+            </Typography>
+          </Box>
         </Box>
-      </Box>
+      </Paper>
     </Container>
   );
 };
