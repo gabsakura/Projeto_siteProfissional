@@ -17,6 +17,7 @@ import Inventory from './Inventory';
 import api from '../services/api';
 import { formatCurrency, formatNumber, formatPercent, formatInteger } from '../utils/formatters';
 import KanbanBoard from './Kanban/KanbanBoard';
+import { motion } from 'framer-motion';
 
 // Função para calcular a mudança percentual
 const calculateChange = (current, previous) => {
@@ -87,7 +88,12 @@ const Dashboard = () => {
 
   const { financialData, loading, error } = useFinancialData(startDate, endDate);
 
-  const setDateRange = (days) => {
+  // Inicializa com os últimos 7 dias
+  useEffect(() => {
+    handleQuickFilter(7);
+  }, []); // Array vazio para executar apenas na montagem
+
+  const handleQuickFilter = (days) => {
     const end = new Date();
     const start = new Date();
     start.setDate(end.getDate() - days + 1);
@@ -96,10 +102,6 @@ const Dashboard = () => {
     setStartDate(start.toISOString().split('T')[0]);
     setEndDate(end.toISOString().split('T')[0]);
   };
-
-  useEffect(() => {
-    setDateRange(7);
-  }, []);
 
   const getSummaryData = () => {
     if (financialData.length === 0) return null;
@@ -242,55 +244,171 @@ const Dashboard = () => {
                   spacing={1}
                   width={{ xs: '100%', sm: 'auto' }}
                 >
-                  <TextField
-                    label="Início"
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    InputLabelProps={{ shrink: true }}
-                    size="small"
-                    sx={{ width: { xs: '100%', sm: '140px' } }}
-                  />
-                  <TextField
-                    label="Fim"
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    InputLabelProps={{ shrink: true }}
-                    size="small"
-                    sx={{ width: { xs: '100%', sm: '140px' } }}
-                  />
-                  <Button 
-                    variant="contained" 
-                    onClick={() => useFinancialData(startDate, endDate)}
-                    size="small"
-                    sx={{ height: '40px' }}
+                  <Stack 
+                    direction="row" 
+                    spacing={1}
+                    sx={{ 
+                      display: { xs: 'flex' },
+                      mb: { xs: 1, sm: 0 }
+                    }}
                   >
-                    Aplicar
-                  </Button>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => handleQuickFilter(7)}
+                      sx={{ 
+                        minWidth: '100px',
+                        color: (theme) => theme.palette.mode === 'dark' ? '#90caf9' : 'primary.main',
+                        borderColor: (theme) => theme.palette.mode === 'dark' ? '#90caf9' : 'primary.main',
+                        '&:hover': {
+                          borderColor: (theme) => theme.palette.mode === 'dark' ? '#42a5f5' : 'primary.dark',
+                          backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(144, 202, 249, 0.08)' : 'primary.light',
+                          color: (theme) => theme.palette.mode === 'dark' ? '#42a5f5' : 'primary.dark'
+                        }
+                      }}
+                    >
+                      7 dias
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => handleQuickFilter(15)}
+                      sx={{ 
+                        minWidth: '100px',
+                        color: (theme) => theme.palette.mode === 'dark' ? '#ce93d8' : 'secondary.main',
+                        borderColor: (theme) => theme.palette.mode === 'dark' ? '#ce93d8' : 'secondary.main',
+                        '&:hover': {
+                          borderColor: (theme) => theme.palette.mode === 'dark' ? '#ab47bc' : 'secondary.dark',
+                          backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(206, 147, 216, 0.08)' : 'secondary.light',
+                          color: (theme) => theme.palette.mode === 'dark' ? '#ab47bc' : 'secondary.dark'
+                        }
+                      }}
+                    >
+                      15 dias
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => handleQuickFilter(30)}
+                      sx={{ 
+                        minWidth: '100px',
+                        color: (theme) => theme.palette.mode === 'dark' ? '#81c784' : 'success.main',
+                        borderColor: (theme) => theme.palette.mode === 'dark' ? '#81c784' : 'success.main',
+                        '&:hover': {
+                          borderColor: (theme) => theme.palette.mode === 'dark' ? '#4caf50' : 'success.dark',
+                          backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(129, 199, 132, 0.08)' : 'success.light',
+                          color: (theme) => theme.palette.mode === 'dark' ? '#4caf50' : 'success.dark'
+                        }
+                      }}
+                    >
+                      30 dias
+                    </Button>
+                  </Stack>
+
+                  <Stack 
+                    direction={{ xs: 'column', sm: 'row' }} 
+                    spacing={1}
+                  >
+                    <TextField
+                      label="Início"
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      InputLabelProps={{ shrink: true }}
+                      size="small"
+                      sx={{ width: { xs: '100%', sm: '140px' } }}
+                    />
+                    <TextField
+                      label="Fim"
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      InputLabelProps={{ shrink: true }}
+                      size="small"
+                      sx={{ width: { xs: '100%', sm: '140px' } }}
+                    />
+                    <Button 
+                      variant="contained" 
+                      onClick={() => fetchData()}
+                      size="small"
+                      sx={{ 
+                        height: '40px',
+                        bgcolor: (theme) => theme.palette.mode === 'dark' ? 'primary.dark' : 'primary.main',
+                        color: '#fff',
+                        '&:hover': {
+                          bgcolor: (theme) => theme.palette.mode === 'dark' ? 'primary.main' : 'primary.dark',
+                        }
+                      }}
+                    >
+                      Aplicar
+                    </Button>
+                  </Stack>
                 </Stack>
               </Stack>
 
               <Grid container spacing={1.5}>
                 {getSummaryData()?.map((item, index) => (
                   <Grid item xs={6} sm={4} md={2.4} key={index}>
-                    <Card sx={{ 
-                      p: 2, 
-                      height: '100%',
-                      borderRadius: '12px',
-                      background: `linear-gradient(135deg, ${item.color}15, ${item.color}05)`,
-                      border: `1px solid ${item.color}30`
-                    }}>
-                      <Stack spacing={1}>
-                        <Box sx={{ color: item.color }}>{item.icon}</Box>
-                        <Typography variant="body2" color="text.secondary">
-                          {item.title}
-                        </Typography>
-                        <Typography variant="h6" sx={{ fontSize: '1.1rem' }}>
-                          {item.value}
-                        </Typography>
-                      </Stack>
-                    </Card>
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ 
+                        duration: 0.5,
+                        delay: index * 0.1 // Efeito cascata
+                      }}
+                      whileHover={{ 
+                        y: -5,
+                        transition: { duration: 0.2 }
+                      }}
+                    >
+                      <Card sx={{ 
+                        p: 2, 
+                        height: '100%',
+                        borderRadius: '12px',
+                        background: `linear-gradient(135deg, ${item.color}15, ${item.color}05)`,
+                        border: `1px solid ${item.color}30`,
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          boxShadow: `0 8px 24px ${item.color}20`,
+                          border: `1px solid ${item.color}50`,
+                          background: `linear-gradient(135deg, ${item.color}20, ${item.color}10)`
+                        }
+                      }}>
+                        <Stack spacing={1}>
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ 
+                              delay: index * 0.1 + 0.3,
+                              type: "spring",
+                              stiffness: 300
+                            }}
+                          >
+                            <Box sx={{ color: item.color }}>{item.icon}</Box>
+                          </motion.div>
+                          
+                          <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.1 + 0.4 }}
+                          >
+                            <Typography variant="body2" color="text.secondary">
+                              {item.title}
+                            </Typography>
+                          </motion.div>
+                          
+                          <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.1 + 0.5 }}
+                          >
+                            <Typography variant="h6" sx={{ fontSize: '1.1rem' }}>
+                              {item.value}
+                            </Typography>
+                          </motion.div>
+                        </Stack>
+                      </Card>
+                    </motion.div>
                   </Grid>
                 ))}
               </Grid>
