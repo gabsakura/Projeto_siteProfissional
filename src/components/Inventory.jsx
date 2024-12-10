@@ -42,7 +42,7 @@ const Inventory = () => {
 
   const fetchInventory = async () => {
     try {
-      const response = await api.get('/inventory');
+      const response = await api.get('/api/inventory');
       setInventory(response.data.data);
     } catch (error) {
       console.error('Erro ao buscar o inventário:', error);
@@ -84,10 +84,10 @@ const Inventory = () => {
       }
 
       if (editingItem) {
-        await api.put(`/inventory/${editingItem.id}`, formData);
+        await api.put(`/api/inventory/${editingItem.id}`, formData);
         setSuccess('Item atualizado com sucesso!');
       } else {
-        await api.post('/inventory', formData);
+        await api.post('/api/inventory', formData);
         setSuccess('Item adicionado com sucesso!');
       }
       
@@ -111,7 +111,7 @@ const Inventory = () => {
     }
 
     try {
-      await api.delete(`/inventory/${id}`);
+      await api.delete(`/api/inventory/${id}`);
       setSuccess('Item excluído com sucesso!');
       fetchInventory();
     } catch (error) {

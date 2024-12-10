@@ -1,10 +1,44 @@
 // src/components/Sidebar.js
 import React from 'react';
-import { Drawer, List, ListItem, ListItemIcon, ListItemText, Toolbar, Typography, IconButton } from '@mui/material';
-import { Home, Person, Notifications, Dashboard, AdminPanelSettings } from '@mui/icons-material';
-import { Link } from 'react-router-dom';
+import { 
+  Drawer, 
+  List, 
+  ListItem, 
+  ListItemIcon, 
+  ListItemText, 
+  Toolbar, 
+  Typography, 
+  IconButton,
+  Divider,
+  Box
+} from '@mui/material';
+import { 
+  Home, 
+  Person, 
+  Notifications, 
+  Dashboard, 
+  AdminPanelSettings,
+  Logout as LogoutIcon
+} from '@mui/icons-material';
+import { Link, useNavigate } from 'react-router-dom';
 
-const Sidebar = ({ isAdmin, darkMode, toggleDarkMode }) => {
+const Sidebar = ({ isAdmin, darkMode, toggleDarkMode, onLogout }) => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Limpa o localStorage
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    
+    // Executa a função de logout do App
+    if (onLogout) {
+      onLogout();
+    }
+    
+    // Redireciona para a página de login
+    navigate('/login');
+  };
+
   return (
     <Drawer
       variant="permanent"
@@ -14,6 +48,8 @@ const Sidebar = ({ isAdmin, darkMode, toggleDarkMode }) => {
         '& .MuiDrawer-paper': {
           width: 240,
           boxSizing: 'border-box',
+          display: 'flex',
+          flexDirection: 'column',
         },
       }}
     >
@@ -25,7 +61,10 @@ const Sidebar = ({ isAdmin, darkMode, toggleDarkMode }) => {
           {darkMode ? '🌞' : '🌜'}
         </IconButton>
       </Toolbar>
-      <List>
+      <Divider />
+      
+      {/* Menu principal */}
+      <List sx={{ flexGrow: 1 }}>
         <ListItem button component={Link} to="/dashboard">
           <ListItemIcon><Home /></ListItemIcon>
           <ListItemText primary="Dashboard" />
@@ -51,6 +90,35 @@ const Sidebar = ({ isAdmin, darkMode, toggleDarkMode }) => {
           </>
         )}
       </List>
+      
+      {/* Botão de Logout */}
+      <Divider />
+      <Box sx={{ p: 2 }}>
+        <ListItem 
+          button 
+          onClick={handleLogout}
+          sx={{ 
+            borderRadius: '8px',
+            '&:hover': { 
+              backgroundColor: 'error.light',
+              '& .MuiListItemIcon-root, & .MuiListItemText-primary': {
+                color: 'error.main'
+              }
+            }
+          }}
+        >
+          <ListItemIcon>
+            <LogoutIcon color="error" />
+          </ListItemIcon>
+          <ListItemText 
+            primary="Sair" 
+            primaryTypographyProps={{ 
+              color: 'error',
+              fontWeight: 'medium'
+            }} 
+          />
+        </ListItem>
+      </Box>
     </Drawer>
   );
 };

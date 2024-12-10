@@ -38,7 +38,7 @@ const useFinancialData = (startDate, endDate) => {
       try {
         setLoading(true);
         setError(null);
-        const response = await api.get('/financial_data', {
+        const response = await api.get('/api/financial_data', {
           params: { startDate, endDate }
         });
 
@@ -60,7 +60,7 @@ const useFinancialData = (startDate, endDate) => {
         console.error('Erro ao buscar dados financeiros:', error);
         setError('Erro ao carregar dados financeiros');
         if (error.response?.status === 401) {
-          // Redirecionar para login se o token expirou
+          localStorage.clear();
           window.location.href = '/login';
         }
       } finally {
@@ -68,7 +68,9 @@ const useFinancialData = (startDate, endDate) => {
       }
     };
 
-    fetchFinancialData();
+    if (startDate && endDate) {
+      fetchFinancialData();
+    }
   }, [startDate, endDate]);
 
   return { financialData, loading, error };
@@ -110,7 +112,7 @@ const Dashboard = () => {
       },
       {
         title: 'Total de Clientes',
-        value: total('total_customers'),
+        value: Math.round(total('total_customers')),
         icon: <PeopleIcon />,
         color: '#9c27b0'
       },
@@ -128,7 +130,7 @@ const Dashboard = () => {
       },
       {
         title: 'Novos Clientes',
-        value: total('new_customers'),
+        value: Math.round(total('new_customers')),
         icon: <PeopleIcon />,
         color: '#ff9800'
       },
@@ -147,7 +149,7 @@ const Dashboard = () => {
       label: 'Total de Clientes', 
       data: financialData.map(item => ({ 
         name: formatDate(item.timestamp), 
-        value: Number(item.total_customers).toFixed(1)
+        value: Math.round(Number(item.total_customers))
       })) 
     },
     { 
@@ -175,7 +177,7 @@ const Dashboard = () => {
       label: 'Novos Clientes', 
       data: financialData.map(item => ({ 
         name: formatDate(item.timestamp), 
-        value: Number(item.new_customers).toFixed(1)
+        value: Math.round(Number(item.new_customers))
       })) 
     },
   ];
