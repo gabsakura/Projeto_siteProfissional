@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, Typography, Box, IconButton, Modal, Button } from '@mui/material';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
+import { formatCurrency, formatNumber, formatInteger } from '../utils/formatters';
 
 const ChartCard = ({ title, lineData = [], chartType, height = 300 }) => {
   console.log('ChartCard render:', { title, lineData, chartType });
@@ -26,10 +27,14 @@ const ChartCard = ({ title, lineData = [], chartType, height = 300 }) => {
   const yAxisDomain = [Math.floor(minValue * 0.9), Math.ceil(maxValue * 1.1)];
 
   const formatValue = (value, name) => {
-    if (name.includes('Dinheiro') || name.includes('Vendas') || name.includes('Despesas')) {
-      return `R$ ${Number(value).toFixed(2)}`;
+    if (name.includes('Dinheiro') || name.includes('Vendas') || 
+        name.includes('Despesas') || name.includes('Lucro')) {
+      return formatCurrency(value);
     }
-    return Number(value).toFixed(0);
+    if (name.includes('Clientes')) {
+      return formatInteger(value);
+    }
+    return formatNumber(value);
   };
 
   const renderChart = (isModal) => {
@@ -42,7 +47,10 @@ const ChartCard = ({ title, lineData = [], chartType, height = 300 }) => {
           <LineChart data={lineData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
             <XAxis dataKey="name" tick={{ fontSize: 12 }} />
             <YAxis domain={yAxisDomain} tick={{ fontSize: 12 }} />
-            <Tooltip formatter={(value, name) => [formatValue(value, name), name]} />
+            <Tooltip 
+              formatter={(value, name) => [formatValue(value, name), name]} 
+              labelFormatter={(label) => `Data: ${label}`}
+            />
             <Line type="monotone" dataKey="value" stroke="#8884d8" strokeWidth={2} dot={false} />
           </LineChart>
         )}
@@ -50,7 +58,10 @@ const ChartCard = ({ title, lineData = [], chartType, height = 300 }) => {
           <BarChart data={lineData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
             <XAxis dataKey="name" tick={{ fontSize: 12 }} />
             <YAxis domain={yAxisDomain} tick={{ fontSize: 12 }} />
-            <Tooltip formatter={(value, name) => [formatValue(value, name), name]} />
+            <Tooltip 
+              formatter={(value, name) => [formatValue(value, name), name]} 
+              labelFormatter={(label) => `Data: ${label}`}
+            />
             <Bar dataKey="value" fill="#8884d8" />
           </BarChart>
         )}
@@ -61,7 +72,10 @@ const ChartCard = ({ title, lineData = [], chartType, height = 300 }) => {
                 <Cell key={`cell-${index}`} fill="#8884d8" />
               ))}
             </Pie>
-            <Tooltip formatter={(value, name) => [formatValue(value, name), name]} />
+            <Tooltip 
+              formatter={(value, name) => [formatValue(value, name), name]} 
+              labelFormatter={(label) => `Data: ${label}`}
+            />
           </PieChart>
         )}
       </ResponsiveContainer>

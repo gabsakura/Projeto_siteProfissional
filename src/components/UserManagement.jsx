@@ -37,6 +37,7 @@ import {
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import validateUserData from '../utils/validators';
+import { formatDateTime } from '../utils/formatters';
 
 const UserManagement = () => {
   const navigate = useNavigate();
@@ -242,6 +243,7 @@ const UserManagement = () => {
               <TableCell>Email</TableCell>
               <TableCell>Tipo</TableCell>
               <TableCell>Status</TableCell>
+              <TableCell>Data de Criaç��o</TableCell>
               <TableCell align="center">Ações</TableCell>
             </TableRow>
           </TableHead>
@@ -265,6 +267,11 @@ const UserManagement = () => {
                       color={user.verified ? 'success' : 'warning'}
                       size="small"
                     />
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="caption" color="textSecondary">
+                      {user.created_at ? formatDateTime(user.created_at) : '-'}
+                    </Typography>
                   </TableCell>
                   <TableCell align="center">
                     <Tooltip title="Editar">

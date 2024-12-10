@@ -26,6 +26,7 @@ import {
   Edit as EditIcon
 } from '@mui/icons-material';
 import api from '../services/api';
+import { formatCurrency, formatNumber } from '../utils/formatters';
 
 const Inventory = () => {
   const [inventory, setInventory] = useState([]);
@@ -183,6 +184,7 @@ const Inventory = () => {
                 <TableCell align="right" sx={{ fontWeight: 'bold', fontSize: '1rem' }}>Quantidade</TableCell>
                 <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }}>Descrição</TableCell>
                 <TableCell align="right" sx={{ fontWeight: 'bold', fontSize: '1rem' }}>Preço</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 'bold', fontSize: '1rem' }}>Total</TableCell>
                 <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '1rem' }}>Ações</TableCell>
               </TableRow>
             </TableHead>
@@ -193,10 +195,13 @@ const Inventory = () => {
                   sx={{ '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' } }}
                 >
                   <TableCell sx={{ fontSize: '0.95rem' }}>{item.item}</TableCell>
-                  <TableCell align="right" sx={{ fontSize: '0.95rem' }}>{item.quantity}</TableCell>
+                  <TableCell align="right" sx={{ fontSize: '0.95rem' }}>{formatNumber(item.quantity)}</TableCell>
                   <TableCell sx={{ fontSize: '0.95rem' }}>{item.descricao}</TableCell>
                   <TableCell align="right" sx={{ fontSize: '0.95rem' }}>
-                    R$ {Number(item.preco).toFixed(2)}
+                    {formatCurrency(item.preco)}
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontSize: '0.95rem' }}>
+                    {formatCurrency(item.quantity * item.preco)}
                   </TableCell>
                   <TableCell align="center">
                     <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>

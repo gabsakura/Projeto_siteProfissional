@@ -38,13 +38,15 @@ const LoginForm = ({ onLogin }) => {
     setError('');
 
     try {
+      console.log('Tentando login com:', { email, password });
+
       const response = await api.post('/api/login', { email, password });
       console.log('Resposta do login:', response.data);
 
       const { token, user } = response.data;
       
-      if (!user || !user.id) {
-        throw new Error('Dados do usuário inválidos');
+      if (!token || !user) {
+        throw new Error('Dados de autenticação inválidos');
       }
       
       localStorage.setItem('token', token);
@@ -54,12 +56,11 @@ const LoginForm = ({ onLogin }) => {
       navigate('/dashboard');
     } catch (error) {
       console.error('Erro no login:', error);
-      if (error.message === 'Dados do usuário inválidos') {
-        setError('Erro ao processar dados do usuário');
+      if (error.response?.status === 401) {
+        setError('Email ou senha incorretos');
       } else {
         setError(error.response?.data?.error || 'Erro ao fazer login');
       }
-      localStorage.clear();
     }
   };
 

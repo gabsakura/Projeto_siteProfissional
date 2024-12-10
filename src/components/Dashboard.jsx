@@ -10,10 +10,13 @@ import {
   AttachMoney as MonetizationOnIcon,
   Receipt as ReceiptIcon,
   Payment as PaymentIcon,
-  People as PeopleIcon
+  People as PeopleIcon,
+  ViewKanban as ViewKanbanIcon
 } from '@mui/icons-material';
 import Inventory from './Inventory';
 import api from '../services/api';
+import { formatCurrency, formatNumber, formatPercent, formatInteger } from '../utils/formatters';
+import KanbanBoard from './Kanban/KanbanBoard';
 
 // Função para calcular a mudança percentual
 const calculateChange = (current, previous) => {
@@ -106,31 +109,31 @@ const Dashboard = () => {
     return [
       {
         title: 'Total em Dinheiro',
-        value: `R$ ${total('total_money').toFixed(2)}`,
+        value: formatCurrency(total('total_money')),
         icon: <MonetizationOnIcon />,
         color: '#2196f3'
       },
       {
         title: 'Total de Clientes',
-        value: Math.round(total('total_customers')),
+        value: formatInteger(total('total_customers')),
         icon: <PeopleIcon />,
         color: '#9c27b0'
       },
       {
         title: 'Vendas',
-        value: `R$ ${total('sales').toFixed(2)}`,
+        value: formatCurrency(total('sales')),
         icon: <ReceiptIcon />,
         color: '#4caf50'
       },
       {
         title: 'Despesas',
-        value: `R$ ${total('expenses').toFixed(2)}`,
+        value: formatCurrency(total('expenses')),
         icon: <PaymentIcon />,
         color: '#f44336'
       },
       {
         title: 'Novos Clientes',
-        value: Math.round(total('new_customers')),
+        value: formatInteger(total('new_customers')),
         icon: <PeopleIcon />,
         color: '#ff9800'
       },
@@ -142,7 +145,7 @@ const Dashboard = () => {
       label: 'Total em Dinheiro', 
       data: financialData.map(item => ({ 
         name: formatDate(item.timestamp), 
-        value: Number(item.total_money).toFixed(2)
+        value: Number(item.total_money)
       })) 
     },
     { 
@@ -210,6 +213,7 @@ const Dashboard = () => {
           >
             <Tab label="Dashboard" />
             <Tab label="Inventário" />
+            <Tab label="Kanban" icon={<ViewKanbanIcon />} />
           </Tabs>
         </CardContent>
       </Card>
@@ -221,53 +225,18 @@ const Dashboard = () => {
             boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
           }}>
             <CardContent sx={{ p: { xs: 1.5, sm: 2 }, '&:last-child': { pb: 2 } }}>
-              <Typography variant="h6" sx={{ mb: 1.5, fontSize: '1rem' }}>Período: {startDate} a {endDate}</Typography>
               <Stack 
-                direction={{ xs: 'column', sm: 'row' }} 
-                spacing={1.5} 
-                alignItems="center"
+                direction="row" 
+                justifyContent="space-between" 
+                alignItems="center" 
+                flexWrap="wrap"
+                gap={2}
+                mb={2}
               >
-                <Box sx={{ 
-                  display: 'flex', 
-                  gap: 1,
-                  flexWrap: 'wrap',
-                  justifyContent: 'center'
-                }}>
-                  <Button 
-                    variant="outlined" 
-                    onClick={() => setDateRange(7)}
-                    size="small"
-                    sx={{ 
-                      minWidth: '100px',
-                      height: '32px'
-                    }}
-                  >
-                    7 dias
-                  </Button>
-                  <Button 
-                    variant="outlined" 
-                    onClick={() => setDateRange(15)}
-                    size="small"
-                    sx={{ 
-                      minWidth: '100px',
-                      height: '32px'
-                    }}
-                  >
-                    15 dias
-                  </Button>
-                  <Button 
-                    variant="outlined" 
-                    onClick={() => setDateRange(30)}
-                    size="small"
-                    sx={{ 
-                      minWidth: '100px',
-                      height: '32px'
-                    }}
-                  >
-                    30 dias
-                  </Button>
-                </Box>
-                <Divider orientation="vertical" flexItem />
+                <Typography variant="h6" sx={{ fontSize: '1rem' }}>
+                  Período: {startDate} a {endDate}
+                </Typography>
+                
                 <Stack 
                   direction={{ xs: 'column', sm: 'row' }} 
                   spacing={1}
@@ -301,55 +270,40 @@ const Dashboard = () => {
                   </Button>
                 </Stack>
               </Stack>
+
+              <Grid container spacing={1.5}>
+                {getSummaryData()?.map((item, index) => (
+                  <Grid item xs={6} sm={4} md={2.4} key={index}>
+                    <Card sx={{ 
+                      p: 2, 
+                      height: '100%',
+                      borderRadius: '12px',
+                      background: `linear-gradient(135deg, ${item.color}15, ${item.color}05)`,
+                      border: `1px solid ${item.color}30`
+                    }}>
+                      <Stack spacing={1}>
+                        <Box sx={{ color: item.color }}>{item.icon}</Box>
+                        <Typography variant="body2" color="text.secondary">
+                          {item.title}
+                        </Typography>
+                        <Typography variant="h6" sx={{ fontSize: '1.1rem' }}>
+                          {item.value}
+                        </Typography>
+                      </Stack>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
             </CardContent>
           </Card>
 
           <Grid container spacing={1.5}>
-            {getSummaryData()?.map((item, index) => (
-              <Grid item xs={6} sm={4} md={2.4} key={index}>
-                <Card sx={{ 
-                  borderRadius: '12px',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-                  transition: 'transform 0.2s, box-shadow 0.2s',
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-                  }
-                }}>
-                  <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                      <Typography color="textSecondary" variant="body2" sx={{ fontSize: '0.875rem' }}>
-                        {item.title}
-                      </Typography>
-                      <IconButton 
-                        size="small" 
-                        sx={{ 
-                          backgroundColor: `${item.color}15`, 
-                          color: item.color,
-                          width: 28,
-                          height: 28
-                        }}
-                      >
-                        {item.icon}
-                      </IconButton>
-                    </Box>
-                    <Typography variant="h6" component="div" sx={{ mb: 0.5, fontSize: '1.1rem' }}>
-                      {item.value}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-
-          <Grid container spacing={1.5}>
-            {financialDataMapping.map((item, index) => (
-              <Grid item xs={12} sm={6} md={4} key={index}>
-                <ChartCard 
-                  title={item.label} 
-                  lineData={item.data} 
-                  chartType={chartType} 
-                  height={180} 
+            {financialDataMapping.map((chart, index) => (
+              <Grid item xs={12} md={6} key={index}>
+                <ChartCard
+                  title={chart.label}
+                  lineData={chart.data}
+                  chartType={chartType}
                 />
               </Grid>
             ))}
@@ -357,9 +311,9 @@ const Dashboard = () => {
         </Box>
       )}
 
-      {tabValue === 1 && (
-        <Inventory />
-      )}
+      {tabValue === 1 && <Inventory />}
+      
+      {tabValue === 2 && <KanbanBoard />}
     </Box>
   );
 };
