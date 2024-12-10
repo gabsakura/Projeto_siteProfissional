@@ -84,11 +84,18 @@ const Inventory = () => {
         return;
       }
 
+      const dataToSend = {
+        item: formData.item,
+        quantity: Number(formData.quantity),
+        descricao: formData.descricao,
+        preco: Number(formData.preco)
+      };
+
       if (editingItem) {
-        await api.put(`/api/inventory/${editingItem.id}`, formData);
+        await api.put(`/api/inventory/${editingItem.id}`, dataToSend);
         setSuccess('Item atualizado com sucesso!');
       } else {
-        await api.post('/api/inventory', formData);
+        await api.post('/api/inventory', dataToSend);
         setSuccess('Item adicionado com sucesso!');
       }
       
