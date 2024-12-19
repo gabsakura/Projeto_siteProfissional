@@ -17,7 +17,7 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import ptBR from 'date-fns/locale/pt-BR';
 
 // Certifique-se que suas URLs de API estão configuradas corretamente
-const API_URL = import.meta.env.VITE_API_URL || 'https://seu-backend.onrender.com';
+const API_URL = import.meta.env.VITE_API_URL || 'https://siteprof-backend.onrender.com';
 
 function App() {
   const [darkMode, setDarkMode] = useState(false);
