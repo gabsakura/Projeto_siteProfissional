@@ -6,7 +6,22 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
-    emptyOutDir: true
+    emptyOutDir: true,
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: [
+            'react',
+            'react-dom',
+            'react-router-dom',
+            '@mui/material',
+            '@emotion/react',
+            '@emotion/styled'
+          ]
+        }
+      }
+    }
   },
   server: {
     port: process.env.PORT || 10000,
