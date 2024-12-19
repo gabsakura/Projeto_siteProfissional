@@ -38,29 +38,18 @@ const LoginForm = ({ onLogin }) => {
     setError('');
 
     try {
-      console.log('Tentando login com:', { email, password });
-
       const response = await api.post('/api/login', { email, password });
-      console.log('Resposta do login:', response.data);
-
-      const { token, user } = response.data;
       
-      if (!token || !user) {
-        throw new Error('Dados de autenticação inválidos');
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+        onLogin(response.data.user);
+        navigate('/dashboard');
       }
-      
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-      
-      onLogin(user);
-      navigate('/dashboard');
     } catch (error) {
       console.error('Erro no login:', error);
-      if (error.response?.status === 401) {
-        setError('Email ou senha incorretos');
-      } else {
-        setError(error.response?.data?.error || 'Erro ao fazer login');
-      }
+      setError(error.response?.data?.message || 'Erro ao fazer login');
     }
   };
 
