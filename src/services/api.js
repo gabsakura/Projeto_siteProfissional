@@ -5,7 +5,8 @@ const api = axios.create({
   withCredentials: false,
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json'
+    'Accept': 'application/json',
+    'Access-Control-Allow-Origin': '*'
   }
 });
 
@@ -16,6 +17,9 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    // Adiciona headers CORS para cada requisição
+    config.headers['Access-Control-Allow-Origin'] = '*';
+    config.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS';
     return config;
   },
   (error) => Promise.reject(error)
@@ -25,6 +29,10 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   response => response,
   error => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    }
     console.error('API Error:', error.response?.data || error.message);
     return Promise.reject(error);
   }
