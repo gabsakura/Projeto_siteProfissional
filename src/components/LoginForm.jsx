@@ -16,16 +16,6 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../services/api';
 
-const TEST_CREDENTIALS = {
-  admin: {
-    email: 'admin@example.com',
-    password: 'admin123'
-  },
-  user: {
-    email: 'user@example.com',
-    password: 'user123'
-  }
-};
 
 const LoginForm = ({ onLogin }) => {
   const [email, setEmail] = useState('');
