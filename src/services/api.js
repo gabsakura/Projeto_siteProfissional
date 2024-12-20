@@ -27,7 +27,35 @@ export const login = async (credentials) => {
   }
 };
 
-// Interceptor para adicionar o token
+// APIs específicas
+export const authAPI = {
+  login
+};
+
+export const kanbanAPI = {
+  getColumns: () => api.get('/api/kanban/boards/1/columns'),
+  getCards: () => api.get('/api/kanban'),
+  createCard: (card) => api.post('/api/kanban', card),
+  updateCard: (id, card) => api.put(`/api/kanban/${id}`, card),
+  deleteCard: (id) => api.delete(`/api/kanban/${id}`)
+};
+
+export const financialAPI = {
+  getFinancialData: () => api.get('/api/financial_data'),
+  getChartData: async () => {
+    const response = await api.get('/api/financial_data');
+    return {
+      totalCash: response.data.totalCash || [],
+      customers: response.data.customers || [],
+      profit: response.data.profit || [],
+      sales: response.data.sales || [],
+      expenses: response.data.expenses || [],
+      newCustomers: response.data.newCustomers || []
+    };
+  }
+};
+
+// Interceptores
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -39,7 +67,6 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Interceptor para tratar erros
 api.interceptors.response.use(
   response => response,
   error => {

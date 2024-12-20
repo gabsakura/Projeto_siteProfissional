@@ -18,6 +18,7 @@ import api from '../services/api';
 import { formatCurrency, formatNumber, formatPercent, formatInteger } from '../utils/formatters';
 import KanbanBoard from './Kanban/KanbanBoard';
 import { motion } from 'framer-motion';
+import { financialAPI } from '../services/api';
 
 // Função para calcular a mudança percentual
 const calculateChange = (current, previous) => {
@@ -85,6 +86,16 @@ const Dashboard = () => {
   const [tabValue, setTabValue] = useState(0);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [chartData, setChartData] = useState({
+    totalCash: [],
+    customers: [],
+    profit: [],
+    sales: [],
+    expenses: [],
+    newCustomers: []
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const { financialData, loading, error } = useFinancialData(startDate, endDate);
 
@@ -186,6 +197,26 @@ const Dashboard = () => {
       })) 
     },
   ];
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const data = await financialAPI.getChartData();
+      setChartData(data);
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
+      setError('Erro ao carregar dados do dashboard');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  if (loading) return <div>Carregando...</div>;
+  if (error) return <div>{error}</div>;
 
   return (
     <Box sx={{ 
