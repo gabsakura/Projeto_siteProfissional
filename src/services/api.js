@@ -58,8 +58,33 @@ export const authAPI = {
 };
 
 export const kanbanAPI = {
-  getColumns: () => api.get('/api/kanban/boards/1/columns'),
-  getCards: () => api.get('/api/kanban'),
+  getColumns: async () => {
+    try {
+      const response = await api.get('/api/kanban/boards/1/columns');
+      // Garantir que sempre retornamos um array
+      return {
+        data: {
+          columns: response.data?.columns || []
+        }
+      };
+    } catch (error) {
+      console.error('Erro ao buscar colunas:', error);
+      return { data: { columns: [] } };
+    }
+  },
+  getCards: async () => {
+    try {
+      const response = await api.get('/api/kanban');
+      return {
+        data: {
+          cards: response.data?.cards || []
+        }
+      };
+    } catch (error) {
+      console.error('Erro ao buscar cards:', error);
+      return { data: { cards: [] } };
+    }
+  },
   createCard: (card) => api.post('/api/kanban', card),
   updateCard: (id, card) => api.put(`/api/kanban/${id}`, card),
   deleteCard: (id) => api.delete(`/api/kanban/${id}`)

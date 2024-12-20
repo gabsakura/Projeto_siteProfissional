@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import KanbanColumn from './KanbanColumn';
 import KanbanCardDialog from './KanbanCardDialog';
-import api from '../../services/api';
+import { kanbanAPI } from '../../services/api';
 import '../../styles/kanban.css';
 
 const KanbanBoard = () => {
@@ -20,37 +20,28 @@ const KanbanBoard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      // Busca as colunas do quadro 1 (quadro padrão)
-      const columnsResponse = await api.get('/api/kanban/boards/1/columns');
-      setColumns(columnsResponse.data.columns);
-
-      // Busca os cartões para cada coluna
-      const tasksData = {};
-      for (const column of columnsResponse.data.columns) {
-        const cardsResponse = await api.get(`/api/kanban/columns/${column.id}/cards`);
-        tasksData[column.id] = cardsResponse.data.cards;
+    const fetchColumns = async () => {
+      try {
+        setLoading(true);
+        const response = await kanbanAPI.getColumns();
+        setColumns(response?.data?.columns || []);
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error);
+        setError('Erro ao carregar o quadro Kanban');
+      } finally {
+        setLoading(false);
       }
-      setCards(tasksData);
-    } catch (error) {
-      console.error('Erro ao carregar dados:', error);
-      setError('Erro ao carregar o quadro Kanban');
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+
+    fetchColumns();
+  }, []);
 
   const handleAddColumn = async () => {
     const title = prompt('Nome da coluna:');
     if (!title) return;
 
     try {
-      const response = await api.post('/api/kanban/boards/1/columns', {
+      const response = await kanbanAPI.post('/api/kanban/boards/1/columns', {
         title,
         order_index: columns.length
       });
@@ -68,7 +59,7 @@ const KanbanBoard = () => {
   const handleSaveCard = async (cardData) => {
     try {
       if (cardData.id) {
-        const response = await api.put(`/api/kanban/cards/${cardData.id}`, cardData);
+        const response = await kanbanAPI.put(`/api/kanban/cards/${cardData.id}`, cardData);
         // Atualiza o cartão na lista
         const newCards = { ...cards };
         const columnCards = newCards[cardData.column_id];
@@ -83,7 +74,7 @@ const KanbanBoard = () => {
           due_date: cardData.due_date ? cardData.due_date.toISOString() : null
         };
 
-        const response = await api.post(`/api/kanban/columns/${columns[0].id}/cards`, formattedData);
+        const response = await kanbanAPI.post(`/api/kanban/columns/${columns[0].id}/cards`, formattedData);
 
         const newCards = { ...cards };
         if (!newCards[columns[0].id]) {
@@ -133,7 +124,7 @@ const KanbanBoard = () => {
 
     // Atualiza no backend
     try {
-      await api.put(`/api/kanban/cards/${card.id}/move`, {
+      await kanbanAPI.put(`/api/kanban/cards/${card.id}/move`, {
         columnId: destColumn.id,
         position: destination.index
       });
@@ -148,7 +139,7 @@ const KanbanBoard = () => {
     if (!window.confirm('Tem certeza que deseja excluir este cartão?')) return;
 
     try {
-      await api.delete(`/api/kanban/cards/${cardId}`);
+      await kanbanAPI.delete(`/api/kanban/cards/${cardId}`);
       
       // Atualiza o estado removendo o cartão
       const newCards = { ...cards };
@@ -165,7 +156,7 @@ const KanbanBoard = () => {
     if (!window.confirm('Tem certeza que deseja excluir esta coluna e todos os seus cartões?')) return;
 
     try {
-      await api.delete(`/api/kanban/columns/${columnId}`);
+      await kanbanAPI.delete(`/api/kanban/columns/${columnId}`);
       
       // Atualiza o estado removendo a coluna e seus cartões
       setColumns(columns.filter(col => col.id !== columnId));
@@ -191,6 +182,10 @@ const KanbanBoard = () => {
         <Alert severity="error">{error}</Alert>
       </Box>
     );
+  }
+
+  if (!columns || columns.length === 0) {
+    return <div>Nenhuma coluna encontrada</div>;
   }
 
   return (
