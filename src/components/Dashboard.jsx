@@ -187,6 +187,30 @@ const Dashboard = () => {
     },
   ];
 
+  useEffect(() => {
+    const fetchData = async () => {
+      console.log('Buscando dados financeiros...');
+      try {
+        setLoading(true);
+        const response = await api.get('/api/financial_data');
+        console.log('Resposta dos dados financeiros:', response.data);
+        setFinancialData(response.data);
+      } catch (error) {
+        console.log('Erro detalhado do Dashboard:', {
+          status: error.response?.status,
+          data: error.response?.data,
+          message: error.message
+        });
+        console.error('Erro ao carregar dados:', error);
+        setError('Erro ao carregar dados financeiros');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <Box sx={{ 
       padding: { xs: 1, sm: 2 }, 

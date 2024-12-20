@@ -21,11 +21,18 @@ const KanbanBoard = () => {
   const [error, setError] = useState(null);
   useEffect(() => {
     const fetchColumns = async () => {
+      console.log('Buscando colunas do Kanban...');
       try {
         setLoading(true);
         const response = await kanbanAPI.getColumns();
+        console.log('Resposta das colunas:', response);
         setColumns(response?.data?.columns || []);
       } catch (error) {
+        console.log('Erro detalhado do Kanban:', {
+          status: error.response?.status,
+          data: error.response?.data,
+          message: error.message
+        });
         console.error('Erro ao carregar dados:', error);
         setError('Erro ao carregar o quadro Kanban');
       } finally {

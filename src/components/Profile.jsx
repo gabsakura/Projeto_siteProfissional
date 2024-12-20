@@ -47,60 +47,23 @@ function Profile() {
   const [avatarPreview, setAvatarPreview] = useState(null);
 
   useEffect(() => {
-    const fetchUserData = async () => {
+    const fetchProfile = async () => {
+      console.log('Buscando perfil do usuário...');
       try {
-        const savedUser = JSON.parse(localStorage.getItem('user'));
-        const token = localStorage.getItem('token');
-        
-        console.log('Token:', token);
-        console.log('Usuário salvo:', savedUser);
-
-        if (!savedUser?.id) {
-          console.log('ID do usuário não encontrado');
-          setError('Usuário não encontrado no localStorage');
-          setTimeout(() => {
-            localStorage.clear();
-            window.location.href = '/login';
-          }, 2000);
-          return;
-        }
-
-        const response = await api.get(`/api/users/${savedUser.id}`);
-        console.log('Resposta da API:', response.data);
-        
-        if (!response.data.user) {
-          setError('Usuário não encontrado');
-          setTimeout(() => {
-            localStorage.clear();
-            window.location.href = '/login';
-          }, 2000);
-          return;
-        }
-
-        setUser(response.data.user);
-        setEditData({
-          nome: response.data.user.nome,
-          email: response.data.user.email,
-          currentPassword: '',
-          newPassword: '',
-          confirmPassword: '',
-          descricao: response.data.user.descricao
-        });
+        const response = await api.get('/api/profile');
+        console.log('Resposta do perfil:', response.data);
+        setProfileData(response.data);
       } catch (error) {
-        console.error('Erro ao buscar dados do usuário:', error);
-        if (error.response?.status === 404) {
-          setError('Usuário não encontrado');
-          setTimeout(() => {
-            localStorage.clear();
-            window.location.href = '/login';
-          }, 2000);
-        } else {
-          setError('Erro ao carregar dados do usuário');
-        }
+        console.log('Erro detalhado do Profile:', {
+          status: error.response?.status,
+          data: error.response?.data,
+          message: error.message
+        });
+        console.error('Erro ao carregar perfil:', error);
       }
     };
 
-    fetchUserData();
+    fetchProfile();
   }, []);
 
   const handleEdit = () => {

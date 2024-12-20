@@ -56,32 +56,24 @@ const UserManagement = () => {
   const [success, setSuccess] = useState('');
 
   useEffect(() => {
+    const fetchUsers = async () => {
+      console.log('Buscando usuários...');
+      try {
+        const response = await api.get('/api/users');
+        console.log('Resposta dos usuários:', response.data);
+        setUsers(response.data);
+      } catch (error) {
+        console.log('Erro detalhado do UserManagement:', {
+          status: error.response?.status,
+          data: error.response?.data,
+          message: error.message
+        });
+        console.error('Erro ao buscar usuários:', error);
+      }
+    };
+
     fetchUsers();
   }, []);
-
-  const fetchUsers = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        navigate('/');
-        return;
-      }
-
-      const response = await axios.get('http://localhost:5000/api/users', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      console.log('Usuários recebidos:', response.data); // Para debug
-      setUsers(response.data.users || []);
-    } catch (error) {
-      console.error('Erro ao buscar usuários:', error);
-      if (error.response?.status === 403) {
-        navigate('/dashboard');
-      } else {
-        setError('Erro ao carregar usuários');
-      }
-    }
-  };
 
   const handleOpenDialog = (user = null) => {
     if (user) {
@@ -243,7 +235,7 @@ const UserManagement = () => {
               <TableCell>Email</TableCell>
               <TableCell>Tipo</TableCell>
               <TableCell>Status</TableCell>
-              <TableCell>Data de Criaç��o</TableCell>
+              <TableCell>Data de Criaço</TableCell>
               <TableCell align="center">Ações</TableCell>
             </TableRow>
           </TableHead>

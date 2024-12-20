@@ -42,11 +42,18 @@ const Inventory = () => {
   });
 
   const fetchInventory = async () => {
+    console.log('Buscando dados do inventário...');
     try {
       const response = await api.get('/api/inventory');
+      console.log('Resposta do inventário:', response.data);
       setInventory(response.data.data);
     } catch (error) {
-      console.error('Erro ao buscar o inventário:', error);
+      console.log('Erro detalhado do Inventory:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message
+      });
+      console.error('Erro ao carregar inventário:', error);
       setError('Erro ao carregar inventário');
     }
   };

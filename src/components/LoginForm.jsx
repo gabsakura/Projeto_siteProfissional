@@ -36,12 +36,19 @@ const LoginForm = ({ onLogin }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    console.log('Tentando login com:', { email, password });
 
     try {
       const data = await login({ email, password });
+      console.log('Resposta do login:', data);
       onLogin(data.user);
       navigate('/dashboard');
     } catch (error) {
+      console.log('Erro detalhado do login:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message
+      });
       console.error('Erro no login:', error);
       setError(
         error.response?.data?.message || 
