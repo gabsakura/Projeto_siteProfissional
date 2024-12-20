@@ -94,15 +94,43 @@ const Dashboard = () => {
     expenses: [],
     newCustomers: []
   });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  
+  // Renomeando as variáveis do hook personalizado
+  const { 
+    financialData, 
+    loading: financialLoading, 
+    error: financialError 
+  } = useFinancialData(startDate, endDate);
 
-  const { financialData, loading, error } = useFinancialData(startDate, endDate);
+  // Estado para o carregamento dos dados do gráfico
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
+
+  const fetchData = async () => {
+    try {
+      setIsLoading(true);
+      const data = await financialAPI.getChartData();
+      setChartData(data);
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
+      setLoadError('Erro ao carregar dados do dashboard');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   // Inicializa com os últimos 7 dias
   useEffect(() => {
     handleQuickFilter(7);
-  }, []); // Array vazio para executar apenas na montagem
+  }, []); 
+
+  // Verifica os estados de carregamento e erro
+  if (isLoading || financialLoading) return <div>Carregando...</div>;
+  if (loadError || financialError) return <div>{loadError || financialError}</div>;
 
   const handleQuickFilter = (days) => {
     const end = new Date();
@@ -197,26 +225,6 @@ const Dashboard = () => {
       })) 
     },
   ];
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const data = await financialAPI.getChartData();
-      setChartData(data);
-    } catch (error) {
-      console.error('Erro ao carregar dados:', error);
-      setError('Erro ao carregar dados do dashboard');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  if (loading) return <div>Carregando...</div>;
-  if (error) return <div>{error}</div>;
 
   return (
     <Box sx={{ 
