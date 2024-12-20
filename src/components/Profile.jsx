@@ -53,9 +53,12 @@ function Profile() {
       console.log('Buscando perfil do usuário...');
       try {
         const savedUser = JSON.parse(localStorage.getItem('user'));
-        if (!savedUser?.id) {
-          console.log('Usuário não encontrado no localStorage');
-          navigate('/login');
+        const token = localStorage.getItem('token');
+
+        if (!savedUser?.id || !token) {
+          console.log('Usuário ou token não encontrado');
+          localStorage.clear();
+          navigate('/login', { replace: true });
           return;
         }
 
@@ -63,18 +66,18 @@ function Profile() {
         const response = await api.get(`/api/users/${savedUser.id}`);
         console.log('Resposta do perfil:', response.data);
 
-        if (!response.data.user) {
+        if (!response.data) {
           throw new Error('Dados do usuário não encontrados');
         }
 
-        setUser(response.data.user);
+        setUser(response.data);
         setEditData({
-          nome: response.data.user.nome,
-          email: response.data.user.email,
+          nome: response.data.nome || '',
+          email: response.data.email || '',
           currentPassword: '',
           newPassword: '',
           confirmPassword: '',
-          descricao: response.data.user.descricao || ''
+          descricao: response.data.descricao || ''
         });
       } catch (error) {
         console.log('Erro detalhado do Profile:', {
@@ -82,13 +85,10 @@ function Profile() {
           data: error.response?.data,
           message: error.message
         });
-        console.error('Erro ao carregar perfil:', error);
-        
-        // Se houver erro de autenticação ou usuário não encontrado
+
         if (error.response?.status === 401 || error.response?.status === 404) {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          navigate('/login');
+          localStorage.clear();
+          navigate('/login', { replace: true });
         } else {
           setError('Erro ao carregar perfil. Tente novamente mais tarde.');
         }

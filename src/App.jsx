@@ -26,17 +26,22 @@ function App() {
   const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
-    const initializeAuth = () => {
+    const initAuth = () => {
       const token = localStorage.getItem('token');
       const savedUser = JSON.parse(localStorage.getItem('user') || 'null');
-      if (token && savedUser) {
+      
+      if (!token || !savedUser) {
+        localStorage.clear();
+        setIsLoggedIn(false);
+        setUser(null);
+      } else {
         setIsLoggedIn(true);
         setUser(savedUser);
       }
       setIsInitializing(false);
     };
 
-    initializeAuth();
+    initAuth();
   }, []);
 
   const handleLogin = (userData) => {
@@ -133,18 +138,14 @@ function App() {
                     !isLoggedIn ? (
                       <LoginForm onLogin={handleLogin} />
                     ) : (
-                      <Navigate to="/dashboard" />
+                      <Navigate to="/dashboard" replace />
                     )
                   } 
                 />
                 <Route 
                   path="/" 
                   element={
-                    isLoggedIn ? (
-                      <Navigate to="/dashboard" />
-                    ) : (
-                      <Navigate to="/login" />
-                    )
+                    <Navigate to={isLoggedIn ? "/dashboard" : "/login"} replace />
                   } 
                 />
 
