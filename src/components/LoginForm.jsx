@@ -43,11 +43,26 @@ const LoginForm = ({ onLogin }) => {
       navigate('/dashboard');
     } catch (error) {
       console.error('Erro no login:', error);
-      setError(
-        error.response?.data?.message || 
-        error.response?.data?.error || 
-        'Erro ao fazer login. Tente novamente.'
-      );
+      
+      // Mensagens de erro mais amigáveis
+      let errorMessage = 'Erro ao fazer login. Tente novamente.';
+      
+      if (error.response) {
+        switch (error.response.status) {
+          case 401:
+            errorMessage = 'Email ou senha incorretos.';
+            break;
+          case 500:
+            errorMessage = 'Erro no servidor. Por favor, tente novamente mais tarde.';
+            break;
+          default:
+            errorMessage = error.response.data?.message || 
+                          error.response.data?.error || 
+                          'Erro ao fazer login. Tente novamente.';
+        }
+      }
+      
+      setError(errorMessage);
     }
   };
 

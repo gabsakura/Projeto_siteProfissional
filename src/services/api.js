@@ -19,7 +19,11 @@ export const checkAuth = () => {
 // Função específica para login
 export const login = async (credentials) => {
   try {
+    console.log('Tentando login com:', credentials);
+    console.log('URL da API:', import.meta.env.VITE_API_URL);
+    
     const response = await api.post('/api/auth/login', credentials);
+    console.log('Resposta do login:', response.data);
     
     if (response.data.token) {
       localStorage.setItem('token', response.data.token);
@@ -29,7 +33,21 @@ export const login = async (credentials) => {
     
     return response.data;
   } catch (error) {
-    console.error('API Login Error:', error.response?.data || error.message);
+    console.error('API Login Error:', {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data,
+      config: {
+        url: error.config?.url,
+        method: error.config?.method,
+        headers: error.config?.headers
+      }
+    });
+    
+    // Melhor tratamento de erro
+    if (error.response?.status === 500) {
+      throw new Error('Erro no servidor. Por favor, tente novamente mais tarde.');
+    }
     throw error;
   }
 };
