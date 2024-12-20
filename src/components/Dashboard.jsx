@@ -201,27 +201,27 @@ const Dashboard = () => {
     },
   ];
 
-  useEffect(() => {
-    const fetchData = async () => {
-      console.log('Buscando dados financeiros...');
-      try {
-        setIsLoading(true);
-        const response = await api.get('/api/financial_data');
-        console.log('Resposta dos dados financeiros:', response.data);
-        setChartData(response.data);
-      } catch (error) {
-        console.log('Erro detalhado do Dashboard:', {
-          status: error.response?.status,
-          data: error.response?.data,
-          message: error.message
-        });
-        console.error('Erro ao carregar dados:', error);
-        setDashboardError('Erro ao carregar dados financeiros');
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const fetchData = async () => {
+    console.log('Buscando dados financeiros...');
+    try {
+      setIsLoading(true);
+      const response = await api.get('/api/financial_data');
+      console.log('Resposta dos dados financeiros:', response.data);
+      setChartData(response.data);
+    } catch (error) {
+      console.log('Erro detalhado do Dashboard:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message
+      });
+      console.error('Erro ao carregar dados:', error);
+      setDashboardError('Erro ao carregar dados financeiros');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -375,7 +375,7 @@ const Dashboard = () => {
                     />
                     <Button 
                       variant="contained" 
-                      onClick={() => fetchData()}
+                      onClick={fetchData}
                       size="small"
                       sx={{ 
                         height: '40px',

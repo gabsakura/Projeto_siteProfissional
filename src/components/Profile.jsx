@@ -54,11 +54,19 @@ function Profile() {
       try {
         const savedUser = JSON.parse(localStorage.getItem('user'));
         if (!savedUser?.id) {
-          throw new Error('Usuário não encontrado');
+          console.log('Usuário não encontrado no localStorage');
+          navigate('/login');
+          return;
         }
-        
+
+        console.log('Buscando usuário com ID:', savedUser.id);
         const response = await api.get(`/api/users/${savedUser.id}`);
         console.log('Resposta do perfil:', response.data);
+
+        if (!response.data.user) {
+          throw new Error('Dados do usuário não encontrados');
+        }
+
         setUser(response.data.user);
         setEditData({
           nome: response.data.user.nome,
@@ -66,7 +74,7 @@ function Profile() {
           currentPassword: '',
           newPassword: '',
           confirmPassword: '',
-          descricao: response.data.user.descricao
+          descricao: response.data.user.descricao || ''
         });
       } catch (error) {
         console.log('Erro detalhado do Profile:', {
@@ -75,8 +83,14 @@ function Profile() {
           message: error.message
         });
         console.error('Erro ao carregar perfil:', error);
-        if (error.response?.status === 401 || !localStorage.getItem('token')) {
+        
+        // Se houver erro de autenticação ou usuário não encontrado
+        if (error.response?.status === 401 || error.response?.status === 404) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
           navigate('/login');
+        } else {
+          setError('Erro ao carregar perfil. Tente novamente mais tarde.');
         }
       }
     };
