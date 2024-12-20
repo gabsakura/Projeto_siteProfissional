@@ -63,12 +63,7 @@ function Profile() {
         }
 
         console.log('Buscando usuário com ID:', savedUser.id);
-        const response = await api.get('/api/auth/me', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-
+        const response = await api.get(`/api/users/${savedUser.id}`);
         console.log('Resposta do perfil:', response.data);
 
         if (!response.data) {
@@ -88,17 +83,15 @@ function Profile() {
         console.log('Erro detalhado do Profile:', {
           status: error.response?.status,
           data: error.response?.data,
-          message: error.message,
-          config: error.config
+          message: error.message
         });
 
         if (error.response?.status === 401 || error.response?.status === 404) {
           localStorage.clear();
           navigate('/login', { replace: true });
-          return;
+        } else {
+          setError('Erro ao carregar perfil. Tente novamente mais tarde.');
         }
-
-        setError('Erro ao carregar perfil. Tente novamente mais tarde.');
       }
     };
 
@@ -129,11 +122,6 @@ function Profile() {
 
   const handleSave = async () => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('Token não encontrado');
-      }
-
       const formData = new FormData();
       formData.append('nome', editData.nome);
       formData.append('email', editData.email);
@@ -142,22 +130,26 @@ function Profile() {
         formData.append('avatar', avatarFile);
       }
 
-      const response = await api.put('/api/auth/profile', formData, {
+      const response = await api.put(`/api/users/${user.id}`, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}`
+          'Content-Type': 'multipart/form-data'
         }
       });
 
-      setUser(response.data);
+      setUser(response.data.user);
       setEditing(false);
       setSuccess('Perfil atualizado com sucesso!');
       
       // Atualiza o usuário no localStorage
-      localStorage.setItem('user', JSON.stringify(response.data));
+      const savedUser = JSON.parse(localStorage.getItem('user'));
+      localStorage.setItem('user', JSON.stringify({
+        ...savedUser,
+        nome: editData.nome,
+        email: editData.email,
+        avatar: response.data.user.avatar
+      }));
     } catch (error) {
-      console.error('Erro ao atualizar perfil:', error);
-      setError(error.response?.data?.message || 'Erro ao atualizar perfil');
+      setError(error.response?.data?.error || 'Erro ao atualizar perfil');
     }
   };
 
