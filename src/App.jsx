@@ -33,7 +33,27 @@ function App() {
   }, []);
 
   const theme = createTheme({
-    // ... suas configurações de tema
+    palette: {
+      mode: darkMode ? 'dark' : 'light',
+      background: {
+        default: darkMode ? '#121212' : '#f5f7f9',
+        paper: darkMode ? '#1E1E1E' : '#ffffff',
+      },
+      text: {
+        primary: darkMode ? '#ffffff' : '#2c3e50',
+        secondary: darkMode ? '#b0b3b8' : '#64748b',
+      }
+    },
+    components: {
+      MuiCard: {
+        styleOverrides: {
+          root: {
+            transition: 'all 0.3s ease',
+            backgroundImage: 'none',
+          },
+        },
+      }
+    }
   });
 
   if (isLoading) {
