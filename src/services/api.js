@@ -9,6 +9,13 @@ const api = axios.create({
   }
 });
 
+// Função para verificar autenticação
+export const checkAuth = () => {
+  const token = localStorage.getItem('token');
+  const user = JSON.parse(localStorage.getItem('user') || 'null');
+  return { token, user };
+};
+
 // Função específica para login
 export const login = async (credentials) => {
   try {
@@ -55,10 +62,10 @@ export const financialAPI = {
   }
 };
 
-// Interceptores
+// Configurar interceptor após inicialização
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const { token } = checkAuth();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
