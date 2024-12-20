@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
+import { login } from '../services/api';
 
 const TEST_CREDENTIALS = {
   admin: {
@@ -38,18 +38,16 @@ const LoginForm = ({ onLogin }) => {
     setError('');
 
     try {
-      const response = await api.post('/api/login', { email, password });
-      
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-        api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
-        onLogin(response.data.user);
-        navigate('/dashboard');
-      }
+      const data = await login({ email, password });
+      onLogin(data.user);
+      navigate('/dashboard');
     } catch (error) {
       console.error('Erro no login:', error);
-      setError(error.response?.data?.message || 'Erro ao fazer login');
+      setError(
+        error.response?.data?.message || 
+        error.response?.data?.error || 
+        'Erro ao fazer login. Tente novamente.'
+      );
     }
   };
 
