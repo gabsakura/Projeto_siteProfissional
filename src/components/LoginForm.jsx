@@ -8,11 +8,24 @@ import {
   Container, 
   Box,
   Paper,
-  Alert
+  Alert,
+  Divider,
+  Link
 } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../services/api';
+
+const TEST_CREDENTIALS = {
+  admin: {
+    email: 'admin@example.com',
+    password: 'admin123'
+  },
+  user: {
+    email: 'user@example.com',
+    password: 'user123'
+  }
+};
 
 const LoginForm = ({ onLogin }) => {
   const [email, setEmail] = useState('');
@@ -35,6 +48,34 @@ const LoginForm = ({ onLogin }) => {
         error.response?.data?.error || 
         'Erro ao fazer login. Tente novamente.'
       );
+    }
+  };
+
+  const handleTestCredentials = (type) => {
+    setEmail(TEST_CREDENTIALS[type].email);
+    setPassword(TEST_CREDENTIALS[type].password);
+    setError('');
+  };
+
+  const handleLogin = async (credentials) => {
+    try {
+      const response = await api.post('/api/login', {
+        email: credentials.email,
+        password: credentials.password
+      });
+
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+        onLogin(response.data.user);
+      }
+    } catch (error) {
+      console.error('Erro no login:', {
+        message: error.response?.data?.message || error.message,
+        status: error.response?.status,
+        data: error.response?.data
+      });
     }
   };
 
@@ -111,6 +152,51 @@ const LoginForm = ({ onLogin }) => {
           >
             Entrar
           </Button>
+
+          <Divider sx={{ mb: 2 }}>
+            <Typography color="textSecondary" variant="body2">
+              Credenciais de Teste
+            </Typography>
+          </Divider>
+
+          <Box sx={{ 
+            display: 'flex', 
+            gap: 2, 
+            mb: 2,
+            justifyContent: 'center'
+          }}>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={() => handleTestCredentials('admin')}
+              size="small"
+            >
+              Admin
+            </Button>
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={() => handleTestCredentials('user')}
+              size="small"
+            >
+              Usuário
+            </Button>
+          </Box>
+
+          <Box sx={{ 
+            mt: 2,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 1
+          }}>
+            <Typography variant="caption" color="textSecondary" align="center">
+              Admin: {TEST_CREDENTIALS.admin.email} / {TEST_CREDENTIALS.admin.password}
+            </Typography>
+            <Typography variant="caption" color="textSecondary" align="center">
+              User: {TEST_CREDENTIALS.user.email} / {TEST_CREDENTIALS.user.password}
+            </Typography>
+          </Box>
         </Box>
       </Paper>
     </Container>
