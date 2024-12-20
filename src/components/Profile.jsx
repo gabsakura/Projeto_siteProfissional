@@ -28,6 +28,7 @@ import {
   PhotoCamera as PhotoCameraIcon
 } from '@mui/icons-material';
 import api from '../services/api';
+import { useNavigate } from 'react-router-dom';
 
 function Profile() {
   const [user, setUser] = useState(null);
@@ -45,14 +46,28 @@ function Profile() {
   const [openPasswordDialog, setOpenPasswordDialog] = useState(false);
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProfile = async () => {
       console.log('Buscando perfil do usuário...');
       try {
-        const response = await api.get('/api/profile');
+        const savedUser = JSON.parse(localStorage.getItem('user'));
+        if (!savedUser?.id) {
+          throw new Error('Usuário não encontrado');
+        }
+        
+        const response = await api.get(`/api/users/${savedUser.id}`);
         console.log('Resposta do perfil:', response.data);
-        setProfileData(response.data);
+        setUser(response.data.user);
+        setEditData({
+          nome: response.data.user.nome,
+          email: response.data.user.email,
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: '',
+          descricao: response.data.user.descricao
+        });
       } catch (error) {
         console.log('Erro detalhado do Profile:', {
           status: error.response?.status,
@@ -60,11 +75,14 @@ function Profile() {
           message: error.message
         });
         console.error('Erro ao carregar perfil:', error);
+        if (error.response?.status === 401 || !localStorage.getItem('token')) {
+          navigate('/login');
+        }
       }
     };
 
     fetchProfile();
-  }, []);
+  }, [navigate]);
 
   const handleEdit = () => {
     setEditing(true);

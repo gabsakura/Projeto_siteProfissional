@@ -85,8 +85,22 @@ const Dashboard = () => {
   const [tabValue, setTabValue] = useState(0);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [dashboardError, setDashboardError] = useState(null);
+  const [chartData, setChartData] = useState({
+    totalCash: [],
+    customers: [],
+    profit: [],
+    sales: [],
+    expenses: [],
+    newCustomers: []
+  });
 
-  const { financialData, loading, error } = useFinancialData(startDate, endDate);
+  const { 
+    financialData, 
+    loading: financialLoading, 
+    error: financialError 
+  } = useFinancialData(startDate, endDate);
 
   // Inicializa com os últimos 7 dias
   useEffect(() => {
@@ -191,10 +205,10 @@ const Dashboard = () => {
     const fetchData = async () => {
       console.log('Buscando dados financeiros...');
       try {
-        setLoading(true);
+        setIsLoading(true);
         const response = await api.get('/api/financial_data');
         console.log('Resposta dos dados financeiros:', response.data);
-        setFinancialData(response.data);
+        setChartData(response.data);
       } catch (error) {
         console.log('Erro detalhado do Dashboard:', {
           status: error.response?.status,
@@ -202,14 +216,22 @@ const Dashboard = () => {
           message: error.message
         });
         console.error('Erro ao carregar dados:', error);
-        setError('Erro ao carregar dados financeiros');
+        setDashboardError('Erro ao carregar dados financeiros');
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
     fetchData();
   }, []);
+
+  if (isLoading || financialLoading) {
+    return <div>Carregando...</div>;
+  }
+
+  if (dashboardError || financialError) {
+    return <div>{dashboardError || financialError}</div>;
+  }
 
   return (
     <Box sx={{ 
