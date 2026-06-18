@@ -63,9 +63,9 @@ DB_PATH=./database.db
 VITE_API_URL=http://localhost:5000
 ```
 
+- [back-end Repository](https://mui.com/)
 4. Start the application
 ```bash
-[back-end Repository](https://mui.com/)
 # Start the backend server
 npm run server
 
