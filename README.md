@@ -65,7 +65,7 @@ VITE_API_URL=http://localhost:5000
 
 4. Start the application
 ```bash
-https://github.com/gabsakura/SIteprof-backend
+[back-end Repository](https://mui.com/)
 # Start the backend server
 npm run server
 
