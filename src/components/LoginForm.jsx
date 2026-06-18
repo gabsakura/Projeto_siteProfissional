@@ -12,7 +12,7 @@ import {
   Divider,
   Link
 } from '@mui/material';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import { LockOutlined as LockOutlinedIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../services/api';
 

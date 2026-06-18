@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, Typography, Box, IconButton, Modal, Button } from '@mui/material';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
-import ZoomInIcon from '@mui/icons-material/ZoomIn';
+import { ZoomIn as ZoomInIcon } from '@mui/icons-material';
 import { formatCurrency, formatNumber, formatInteger } from '../utils/formatters';
 import { motion } from 'framer-motion';
 
