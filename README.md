@@ -2,8 +2,6 @@
 
 A modern web application built with React and Node.js for managing finances, inventory, and user profiles.
 
-![Dashboard Preview](dashboard-preview.png)
-
 ## 🌟 Features
 
 ### Dashboard
@@ -46,7 +44,7 @@ A modern web application built with React and Node.js for managing finances, inv
 1. Clone the repository
 
 ```
-git clone https://github.com/yourusername/financial-dashboard.git
+git clone https://github.com/gabsakura/Projeto_siteProfissional.git
 cd financial-dashboard
 ```
 
@@ -65,6 +63,7 @@ DB_PATH=./database.db
 VITE_API_URL=http://localhost:5000
 ```
 
+- [back-end Repository](https://mui.com/)
 4. Start the application
 ```bash
 # Start the backend server
